@@ -48,4 +48,12 @@ resource sqlDatabase 'Microsoft.Sql/servers/databases@2023-08-01-preview' = {
 
 resource allowAzure 'Microsoft.Sql/servers/firewallRules@2023-08-01-preview' = {
   parent: sqlServer
-  name: 'All
+  name: 'AllowAzureServices'
+  properties: {
+    startIpAddress: '0.0.0.0'
+    endIpAddress: '0.0.0.0'
+  }
+}
+
+output sqlServerFqdn string = sqlServer.properties.fullyQualifiedDomainName
+output sqlServerPrincipalId string = sqlServer.identity.principalId
