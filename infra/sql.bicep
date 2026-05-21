@@ -4,8 +4,15 @@
 @description('SQL Server name (globally unique)')
 param sqlServerName string
 
-@description('Azure region')
-param location string = resourceGroup().location
+@description('Azure region for resources. Restricted to regions known to allow SQL DB provisioning on free-tier subscriptions.')
+@allowed([
+  'centralus'
+  'eastus2'
+  'westus3'
+  'southcentralus'
+  'northcentralus'
+])
+param location string = 'centralus'
 
 @description('SQL admin login')
 param sqlAdminLogin string
