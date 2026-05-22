@@ -35,6 +35,7 @@ module sqlServerModule 'modules/sqlServer.bicep' = {
     sqlAdminLogin: sqlAdminLogin
     sqlAdminPassword: sqlAdminPassword
     databaseName: databaseName
+    developerIpAddresses: developerIpAddresses
   }
 }
 
