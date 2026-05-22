@@ -1,8 +1,8 @@
 // main.bicep equivalent - orchestrates SQL infrastructure modules
 // Note: filename remains sql.bicep for now to avoid breaking existing deploy commands.
 
-@description('SQL Server name (globally unique)')
-param sqlServerName string
+@description('SQL Server name (globally unique). Defaults to a deterministic name derived from the resource group.')
+param sqlServerName string = 'sqliac-dev-${uniqueString(resourceGroup().id)}'
 
 @description('Azure region for resources. Restricted to regions known to allow SQL DB provisioning on free-tier subscriptions.')
 @allowed([
@@ -38,3 +38,5 @@ module sqlServerModule 'modules/sqlServer.bicep' = {
 output sqlServerFqdn string = sqlServerModule.outputs.sqlServerFqdn
 output sqlServerPrincipalId string = sqlServerModule.outputs.sqlServerPrincipalId
 output sqlServerName string = sqlServerModule.outputs.sqlServerName
+
+

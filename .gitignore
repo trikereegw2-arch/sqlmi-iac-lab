@@ -427,3 +427,8 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
+
+# IaC secrets - never commit
+.env
+*.local.bicepparam
+infra/params/*.local.bicepparam
