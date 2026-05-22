@@ -24,6 +24,9 @@ param sqlAdminPassword string
 @description('Database name')
 param databaseName string = 'appdb'
 
+@description('Developer IP addresses to allow through the firewall (dev only).')
+param developerIpAddresses array = []
+
 module sqlServerModule 'modules/sqlServer.bicep' = {
   name: 'sqlServerDeployment'
   params: {

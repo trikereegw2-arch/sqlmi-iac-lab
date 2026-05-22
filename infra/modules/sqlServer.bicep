@@ -14,6 +14,9 @@ param sqlAdminPassword string
 @description('Database name')
 param databaseName string = 'appdb'
 
+@description('List of developer IP addresses to allow through the firewall. Empty by default (e.g. prod uses private endpoints instead).')
+param developerIpAddresses array = []
+
 resource sqlServer 'Microsoft.Sql/servers@2023-08-01-preview' = {
   name: sqlServerName
   location: location
@@ -54,6 +57,15 @@ resource allowAzure 'Microsoft.Sql/servers/firewallRules@2023-08-01-preview' = {
     endIpAddress: '0.0.0.0'
   }
 }
+
+resource allowDeveloperIps 'Microsoft.Sql/servers/firewallRules@2023-08-01-preview' = [for (ip, i) in developerIpAddresses: {
+  parent: sqlServer
+  name: 'AllowDeveloperIp-${i}'
+  properties: {
+    startIpAddress: ip
+    endIpAddress: ip
+  }
+}]
 
 output sqlServerFqdn string = sqlServer.properties.fullyQualifiedDomainName
 output sqlServerPrincipalId string = sqlServer.identity.principalId
