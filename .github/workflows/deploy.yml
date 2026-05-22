@@ -1,0 +1,72 @@
+name: Deploy SQL Infrastructure
+
+# When this pipeline runs
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'infra/**'          # only run when infra files change
+  workflow_dispatch:         # also allow manual runs from the Actions tab
+
+# OIDC needs these permissions to request the token
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  validate-and-deploy:
+    runs-on: ubuntu-latest
+    environment: dev          # we'll configure this for approval gates later
+
+    env:
+      RESOURCE_GROUP: rg-sqliac-dev
+      TEMPLATE_FILE: infra/sql.bicep
+      PARAM_FILE: infra/params/dev.bicepparam
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Azure login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Validate Bicep
+        uses: azure/cli@v2
+        with:
+          azcliversion: latest
+          inlineScript: |
+            az deployment group validate \
+              --resource-group "$RESOURCE_GROUP" \
+              --template-file "$TEMPLATE_FILE" \
+              --parameters "$PARAM_FILE"
+        env:
+          SQL_ADMIN_PASSWORD: ${{ secrets.SQL_ADMIN_PASSWORD }}
+
+      - name: What-if (preview changes)
+        uses: azure/cli@v2
+        with:
+          azcliversion: latest
+          inlineScript: |
+            az deployment group what-if \
+              --resource-group "$RESOURCE_GROUP" \
+              --template-file "$TEMPLATE_FILE" \
+              --parameters "$PARAM_FILE"
+        env:
+          SQL_ADMIN_PASSWORD: ${{ secrets.SQL_ADMIN_PASSWORD }}
+
+      - name: Deploy
+        uses: azure/cli@v2
+        with:
+          azcliversion: latest
+          inlineScript: |
+            az deployment group create \
+              --resource-group "$RESOURCE_GROUP" \
+              --template-file "$TEMPLATE_FILE" \
+              --parameters "$PARAM_FILE"
+        env:
+          SQL_ADMIN_PASSWORD: ${{ secrets.SQL_ADMIN_PASSWORD }}
